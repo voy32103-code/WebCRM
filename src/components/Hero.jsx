@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { ArrowUpRight, Play } from 'lucide-react';
 import BlurText from './BlurText';
+import VideoModal from './VideoModal';
 
 export default function Hero({ onOpenContact }) {
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
   return (
     <section className="relative overflow-visible h-[1000px] w-full flex flex-col items-center justify-start pt-[150px]">
       {/* Background Video */}
@@ -36,22 +39,22 @@ export default function Hero({ onOpenContact }) {
           animate={{ opacity: 1, y: 0 }}
           className="liquid-glass rounded-full px-1 py-1 flex items-center gap-3 mb-8"
         >
-          <span className="bg-white text-black rounded-full px-3 py-1 text-xs font-semibold">
-            Mới
+          <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-full px-3 py-1 text-xs font-bold">
+            Phiên bản 2.0
           </span>
-          <span className="text-white/80 text-sm pr-3">
-            Giới thiệu thiết kế web dùng AI.
+          <span className="text-white/80 text-sm pr-3 font-medium">
+            Giới thiệu hệ sinh thái nền tảng WebCRM.
           </span>
         </motion.div>
 
         {/* Heading */}
         <BlurText 
-          text="Website Xứng Tầm" 
+          text="Nền Tảng Agency OS" 
           className="text-6xl md:text-7xl lg:text-[5.5rem] font-heading italic text-foreground leading-[0.8] tracking-[-4px]"
           delay={100}
         />
         <BlurText 
-          text="Với Thương Hiệu Của Bạn" 
+          text="Mạnh Mẽ Vượt Trội" 
           className="text-5xl md:text-6xl lg:text-[5rem] font-heading italic text-foreground leading-[0.8] tracking-[-4px] mt-4"
           delay={300}
         />
@@ -63,7 +66,7 @@ export default function Hero({ onOpenContact }) {
           transition={{ delay: 0.8, duration: 0.6 }}
           className="mt-8 text-sm md:text-base text-white/70 font-body font-light leading-relaxed max-w-lg"
         >
-          Thiết kế tuyệt mỹ. Hiệu suất mượt mà. Được thiết kế bởi AI, hoàn thiện bởi chuyên gia. Trải nghiệm thiết kế web hoàn toàn mới.
+          Trải nghiệm hệ sinh thái 3 trong 1: Giao diện Web đỉnh cao, Hệ thống Quản trị CRM chuyên nghiệp và Công nghệ Tự động hoá bằng AI. Tất cả được tích hợp và may đo trên một hệ thống duy nhất.
         </motion.p>
 
         {/* CTA Buttons */}
@@ -77,7 +80,10 @@ export default function Hero({ onOpenContact }) {
             Bắt Đầu Ngay
             <ArrowUpRight className="w-4 h-4" />
           </button>
-          <button className="group flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+          <button 
+            onClick={() => setIsVideoOpen(true)}
+            className="group flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+          >
             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-white/20 transition-colors">
               <Play className="w-3.5 h-3.5 fill-current" />
             </div>
@@ -86,6 +92,10 @@ export default function Hero({ onOpenContact }) {
         </motion.div>
       </div>
 
+      <VideoModal 
+        isOpen={isVideoOpen} 
+        onClose={() => setIsVideoOpen(false)} 
+      />
     </section>
   );
 }

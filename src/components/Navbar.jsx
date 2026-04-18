@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowUpRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowUpRight, LogOut, User } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useApp } from '../context/AppContext';
+import MyDesignsModal from './MyDesignsModal';
 
 export default function Navbar({ onOpenContact }) {
   const [scrolled, setScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMyDesignsOpen, setIsMyDesignsOpen] = useState(false);
+  const { isAuthenticated, currentUser, logout } = useApp();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,9 +20,14 @@ export default function Navbar({ onOpenContact }) {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
   return (
     <>
-      <motion.nav 
+      <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
@@ -38,12 +48,41 @@ export default function Navbar({ onOpenContact }) {
 
         {/* CTAs & Mobile Toggle */}
         <div className="flex items-center gap-3 z-10">
+          {!isAuthenticated ? (
+            <>
+              <Link to="/login" className="hidden md:flex text-sm font-medium text-white/80 hover:text-white transition-colors">
+                Đăng Nhập
+              </Link>
+              <Link to="/register" className="hidden md:flex liquid-glass border border-white/20 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+                Đăng Ký
+              </Link>
+            </>
+          ) : (
+            <div className="hidden md:flex items-center gap-4">
+              <span className="text-sm font-medium text-white/80 flex items-center gap-2">
+                <User className="w-4 h-4" /> {currentUser?.email?.split('@')[0]}
+              </span>
+              <button onClick={handleLogout} className="text-sm font-medium text-red-400 hover:text-red-300 transition-colors flex items-center gap-1">
+                Thoát
+              </button>
+              {currentUser?.role === 'admin' ? (
+                <Link to="/dashboard" className="liquid-glass border border-white/20 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+                  Vào Dashboard
+                </Link>
+              ) : (
+                <button onClick={() => setIsMyDesignsOpen(true)} className="liquid-glass border border-white/20 rounded-full px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition-colors">
+                  Dự Án Của Tôi
+                </button>
+              )}
+            </div>
+          )}
+
           <button onClick={onOpenContact} className="hidden md:flex bg-white text-black rounded-full px-5 py-2.5 text-sm font-medium font-body items-center gap-1.5 hover:bg-white/90 transition-colors">
             Bắt Đầu
             <ArrowUpRight className="w-4 h-4" />
           </button>
-          
-          <button 
+
+          <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="md:hidden liquid-glass rounded-full px-4 py-2 text-sm font-medium text-white flex items-center gap-2"
           >
@@ -54,7 +93,7 @@ export default function Navbar({ onOpenContact }) {
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: '-100%' }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: '-100%' }}
@@ -65,8 +104,34 @@ export default function Navbar({ onOpenContact }) {
             <a href="#work" onClick={() => setIsMobileMenuOpen(false)} className="text-4xl font-heading italic text-white hover:text-white/70 transition-colors">Dự Án</a>
             <a href="#process" onClick={() => setIsMobileMenuOpen(false)} className="text-4xl font-heading italic text-white hover:text-white/70 transition-colors">Quy Trình</a>
             <a href="#pricing-section" onClick={() => setIsMobileMenuOpen(false)} className="text-4xl font-heading italic text-white hover:text-white/70 transition-colors">Bảng Giá</a>
-            
-            <button 
+
+            <div className="flex gap-4 mt-4">
+              {!isAuthenticated ? (
+                <>
+                  <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-2 text-lg font-medium text-white/80 hover:text-white transition-colors">
+                    Đăng Nhập
+                  </Link>
+                  <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-2 text-lg font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-colors">
+                    Đăng Ký
+                  </Link>
+                </>
+              ) : (
+                <div className="flex flex-col items-center gap-4">
+                  <span className="text-lg text-white/80"><User className="w-5 h-5 inline mr-2" /> {currentUser?.email}</span>
+                  {currentUser?.role === 'admin' ? (
+                    <Link to="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="px-6 py-2 text-lg font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-colors">
+                      Vào Dashboard
+                    </Link>
+                  ) : (
+                    <button onClick={() => { setIsMobileMenuOpen(false); setIsMyDesignsOpen(true); }} className="px-6 py-2 text-lg font-medium text-white border border-white/20 rounded-full hover:bg-white/10 transition-colors">
+                      ✨ Dự Án Của Tôi
+                    </button>
+                  )}
+                  <button onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }} className="text-red-400">Thoát</button>
+                </div>
+              )}
+            </div>
+            <button
               onClick={() => {
                 setIsMobileMenuOpen(false);
                 onOpenContact();
@@ -78,6 +143,9 @@ export default function Navbar({ onOpenContact }) {
           </div>
         </motion.div>
       )}
+
+      {/* Modal hiện Dự án của tôi */}
+      <MyDesignsModal isOpen={isMyDesignsOpen} onClose={() => setIsMyDesignsOpen(false)} />
     </>
   );
 }

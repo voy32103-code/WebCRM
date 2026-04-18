@@ -94,6 +94,78 @@ export default function Settings() {
           </div>
         </div>
 
+        {/* Integration Hub Settings */}
+        <div className="liquid-glass rounded-3xl p-8 border border-white/5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/5 to-blue-500/5 z-0" />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Globe className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-xl font-heading italic text-white flex items-center gap-2">
+                  Integration Hub <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gradient-to-r from-cyan-500 to-blue-500 text-white shadow-[0_0_10px_rgba(6,182,212,0.4)]">ENTERPRISE</span>
+                </h2>
+              </div>
+              <p className="text-white/50 text-xs mt-1">Kết nối WebCRM với các hệ sinh thái khác.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Slack Integration */}
+              <div className="bg-black/40 border border-white/10 rounded-2xl p-5 flex flex-col gap-4 hover:border-white/20 transition-colors">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center p-2">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/d/d5/Slack_icon_2019.svg" alt="Slack" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="w-10 h-5 bg-primary relative rounded-full opacity-80 cursor-not-allowed">
+                    <div className="absolute right-1 top-1 w-3 h-3 bg-black rounded-full" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white font-medium text-sm">Slack Workspace</h3>
+                  <p className="text-white/40 text-xs mt-1">Đã kết nối. Tự động thông báo đơn hàng & yêu cầu thiết kế mới vào kênh #sales.</p>
+                </div>
+              </div>
+
+              {/* Google Calendar Integration */}
+              <div className="bg-black/40 border border-white/10 rounded-2xl p-5 flex flex-col gap-4 hover:border-white/20 transition-colors">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center p-2">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Google_Calendar_icon_%282020%29.svg" alt="Google Calendar" className="w-full h-full object-contain" />
+                  </div>
+                  <div className="w-10 h-5 bg-white/10 relative rounded-full cursor-pointer hover:bg-white/20 transition-colors">
+                    <div className="absolute left-1 top-1 w-3 h-3 bg-white/50 rounded-full" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white font-medium text-sm">Google Calendar</h3>
+                  <p className="text-white/40 text-xs mt-1">Chưa kết nối. Đồng bộ lịch hẹn gặp khách hàng tự động.</p>
+                </div>
+                <button className="w-full py-2 bg-white/5 hover:bg-white/10 text-white/80 text-xs rounded-lg transition-colors border border-white/5 mt-auto">
+                  Kết nối ngay
+                </button>
+              </div>
+
+              {/* Zapier Integration */}
+              <div className="bg-black/40 border border-white/10 rounded-2xl p-5 flex flex-col gap-4 hover:border-white/20 transition-colors">
+                <div className="flex justify-between items-start">
+                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center p-2">
+                    <svg viewBox="0 0 24 24" fill="none" className="w-full h-full text-[#FF4A00]"><path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d="M14.935 3.018l6.044 10.472-8.98 10.473-6.044-10.472 8.98-10.473zM5.955 13.49l-2.935 3.424 6.044 10.472 2.935-3.424-6.044-10.473zM3 10.49l2.935-3.424 6.044 10.472L8.98 20.963 3 10.49z"></path></svg>
+                  </div>
+                  <div className="w-10 h-5 bg-white/10 relative rounded-full cursor-pointer hover:bg-white/20 transition-colors">
+                    <div className="absolute left-1 top-1 w-3 h-3 bg-white/50 rounded-full" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-white font-medium text-sm">Zapier Webhooks</h3>
+                  <p className="text-white/40 text-xs mt-1">Tạo kịch bản tự động hóa 5000+ ứng dụng bên ngoài.</p>
+                </div>
+                <button className="w-full py-2 bg-white/5 hover:bg-white/10 text-white/80 text-xs rounded-lg transition-colors border border-white/5 mt-auto">
+                  Tạo Webhook
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Notification Settings */}
         <div className="liquid-glass rounded-3xl p-8 border border-white/5">
           <div className="flex items-center gap-3 mb-6">

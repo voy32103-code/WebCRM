@@ -50,7 +50,8 @@ export default function FeaturesGrid() {
                 whileInView={{ opacity: 1, y: 0 }}
                 whileHover={{ y: -8, scale: 1.02 }}
                 transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
-                viewport={{ once: true }}
+                viewport={{ once: true, margin: "-50px" }}
+                style={{ willChange: "transform, opacity" }}
                 className="liquid-glass group rounded-2xl p-6 flex flex-col items-start hover:bg-white/[0.05] hover:border-white/20 transition-colors cursor-default border border-transparent"
               >
                 <div className="liquid-glass-strong rounded-full w-10 h-10 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-white transition-all duration-300 shadow-[0_0_0_rgba(255,255,255,0)] group-hover:shadow-[0_0_20px_rgba(255,255,255,0.4)]">

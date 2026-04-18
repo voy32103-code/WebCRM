@@ -8,22 +8,43 @@ import { useApp } from '../context/AppContext';
 export default function Auth({ type }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorLine, setErrorLine] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useApp();
   const navigate = useNavigate();
 
   const isLogin = type === 'login';
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isLogin) {
-      if (login(email, password)) {
-        navigate('/dashboard');
+    setErrorLine('');
+    setLoading(true);
+
+    const url = isLogin ? '/api/auth/login' : '/api/auth/register';
+    
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        login(data.user); // data.user chứa id, email, role
+        if (data.user.role === 'admin') {
+          navigate('/dashboard');
+        } else {
+          navigate('/');
+        }
+      } else {
+        setErrorLine(data.error || 'Có lỗi xảy ra');
       }
-    } else {
-      // Gọi giả lập đăng ký
-      login(email, password);
-      navigate('/dashboard');
+    } catch (err) {
+      setErrorLine('Lỗi mạng hoặc server không phản hồi');
     }
+    
+    setLoading(false);
   };
 
   return (
@@ -56,11 +77,19 @@ export default function Auth({ type }) {
               {isLogin ? 'Đăng nhập vào hệ thống Studio quản trị.' : 'Tham gia cùng hàng ngàn khách hàng của chúng tôi.'}
             </p>
           </div>
+          
+          {errorLine && (
+            <div className="mb-6 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 text-sm font-medium text-center">
+              {errorLine}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             {!isLogin && (
               <div>
                 <input
+                  id="fullName"
+                  name="fullName"
                   type="text"
                   required
                   placeholder="Họ và Tên"
@@ -70,6 +99,8 @@ export default function Auth({ type }) {
             )}
             <div>
               <input
+                id="email"
+                name="email"
                 type="email"
                 required
                 value={email}
@@ -80,6 +111,8 @@ export default function Auth({ type }) {
             </div>
             <div>
               <input
+                id="password"
+                name="password"
                 type="password"
                 required
                 value={password}
@@ -91,9 +124,10 @@ export default function Auth({ type }) {
 
             <button
               type="submit"
-              className="mt-4 w-full bg-white text-black hover:bg-white/90 rounded-xl py-3.5 font-medium text-sm transition-all flex justify-center items-center h-12 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+              disabled={loading}
+              className="mt-4 w-full bg-white text-black hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl py-3.5 font-medium text-sm transition-all flex justify-center items-center h-12 shadow-[0_0_20px_rgba(255,255,255,0.2)]"
             >
-              {isLogin ? 'Đăng Nhập' : 'Đăng Ký Ngay'}
+              {loading ? 'Đang xử lý...' : isLogin ? 'Đăng Nhập' : 'Đăng Ký Ngay'}
             </button>
           </form>
 

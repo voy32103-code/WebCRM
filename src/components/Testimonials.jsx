@@ -41,7 +41,8 @@ export default function Testimonials() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1, ease: 'easeOut' }}
-              viewport={{ once: true }}
+              viewport={{ once: true, margin: "-50px" }}
+              style={{ willChange: "transform, opacity" }}
               className="liquid-glass rounded-2xl p-8 flex flex-col justify-between min-h-[220px]"
             >
               <p className="text-white/80 font-body font-light text-base md:text-lg italic leading-relaxed mb-8">

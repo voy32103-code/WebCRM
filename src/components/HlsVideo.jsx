@@ -24,13 +24,21 @@ export default function HlsVideo({ src, className, saturated = true, ...props })
       hls.loadSource(src);
       hls.attachMedia(video);
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        video.play().catch(e => console.log('Auto-play prevented:', e));
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Im lặng bỏ qua lỗi tiết kiệm pin (AbortError) hoặc Auto-play policy bị chặn
+          });
+        }
       });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
       // Native Safari support
       video.src = src;
       const playVideo = () => {
-        video.play().catch(e => console.log('Auto-play prevented:', e));
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {});
+        }
       };
       video.addEventListener('loadedmetadata', playVideo);
       

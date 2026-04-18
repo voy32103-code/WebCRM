@@ -32,7 +32,8 @@ const TypewriterText = ({ text, onComplete }) => {
 
 export default function ContactModal({ isOpen, onClose, initialMessage = '' }) {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
-  // Các bước: 'form' -> 'analyzing' -> 'drafting' -> 'success'
+  const [isDeposit, setIsDeposit] = useState(false);
+  // Các bước: 'form' -> 'analyzing' -> 'drafting' -> 'checkout' -> 'success'
   const [step, setStep] = useState('form');
   const [aiDraftText, setAiDraftText] = useState('');
   const [isTypingDone, setIsTypingDone] = useState(false);
@@ -41,49 +42,42 @@ export default function ContactModal({ isOpen, onClose, initialMessage = '' }) {
   const draftContainerRef = useRef(null);
 
   const performAIAnalysis = async (message) => {
-    // Nếu có API key thật, gọi Google Gemini
+    const fallbackData = () => {
+      const lowerMsg = message.toLowerCase();
+      if (lowerMsg.includes('tăng trưởng') || lowerMsg.includes('growth')) {
+        return 'Phân tích ban đầu: Nhu cầu nâng cấp hệ thống toàn diện.\n\nĐề xuất: Khởi chạy gói Tăng Trưởng... Chúng tôi sẽ sớm liên hệ với bạn để kick-off dự án.';
+      }
+      if (lowerMsg.includes('3d') || lowerMsg.includes('animation')) {
+        return 'Phân tích ban đầu: Trọng tâm trải nghiệm WebGL.\n\nĐề xuất: Tích hợp Three.js cho trải nghiệm mượt mà 60fps. Lịch tư vấn Demo Tech sẽ được gửi vào email của bạn ngay hôm nay.';
+      }
+      return 'Phân tích ban đầu: Xây dựng nền tảng số hoá chuyên nghiệp.\n\nĐề xuất:\n- Tư vấn giải pháp phù hợp quy mô.\n- Áp dụng quy trình linh hoạt.\n\nChúng tôi đã lưu thông tin và sẽ gọi điện cho bạn ngay ngày mai.';
+    };
+
     if (settings && settings.geminiApiKey) {
       const modelsToTry = ['gemini-2.0-flash-lite', 'gemini-flash-lite-latest', 'gemini-2.0-flash'];
-      let lastError = null;
-
       for (const model of modelsToTry) {
         try {
           const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${settings.geminiApiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: `
-Đóng vai trợ lý AI thông minh của agency thiết kế phần mềm Antigravity. 
-Khách hàng vừa nhập yêu cầu sau để đăng ký tư vấn: "${message}".
-Hãy phản hồi lại họ bằng tiếng Việt trong khoảng 2-3 câu ngắn gọn sắc sảo. 
-Cho họ thấy chúng ta đã tiếp nhận thông tin và hứa hẹn một giải pháp đẳng cấp.
-              ` }] }]
+               contents: [{ parts: [{ text: `Đóng vai trợ lý AI thông minh tư vấn nhanh với thông điệp: "${message}"` }] }]
             })
           });
           const data = await response.json();
           if (!data.error && data.candidates && data.candidates[0].content.parts[0].text) {
              return data.candidates[0].content.parts[0].text;
-          } else if (data.error) {
-             lastError = data.error.message;
-             console.error(`Gemini AI API Error (${model}):`, data.error.message);
           }
         } catch (e) {
-          lastError = e.message;
-          console.error(`Gemini AI Error (${model}):`, e);
+          console.error('Gemini error loop', e);
         }
       }
-      return `Lỗi API (Tất cả Model đều quá tải): ${lastError}`;
+      // Nếu API key báo lỗi limit/quota, ta fallback sang mock data
+      return fallbackData();
     }
     
-    // Fallback: Code giả lập
-    const lowerMsg = message.toLowerCase();
-    if (lowerMsg.includes('tăng trưởng') || lowerMsg.includes('growth')) {
-      return 'Phân tích ban đầu: Nhu cầu nâng cấp hệ thống toàn diện.\n\nĐề xuất: Khởi chạy gói Tăng Trưởng với bộ kho ứng dụng tuỳ chỉnh và CMS cá nhân hoá. Hệ thống sẽ tích hợp sẵn API CRM để tối ưu vận hành.\n\nChúng tôi sẽ sớm liên hệ với bạn để kick-off dự án.';
-    }
-    if (lowerMsg.includes('3d') || lowerMsg.includes('animation')) {
-      return 'Phân tích ban đầu: Trọng tâm trải nghiệm WebGL / Tương tác.\n\nĐề xuất: Tích hợp Three.js cho trải nghiệm mượt mà 60fps mà không làm giảm tốc độ tải trang. Phù hợp cho chiến dịch Branding.\n\nLịch tư vấn Demo Tech sẽ được gửi vào email của bạn ngay hôm nay.';
-    }
-    return 'Phân tích ban đầu: Xây dựng nền tảng số hoá chuyên nghiệp.\n\nĐề xuất:\n- Tư vấn giải pháp phù hợp với quy mô hiện tại.\n- Áp dụng quy trình linh hoạt để dễ cập nhật tính năng.\n\nChúng tôi đã lưu lại thông tin và sẽ gọi điện cho bạn ngay ngày mai để khảo sát kỹ hơn.';
+    // Fallback nếu không có API Key
+    return fallbackData();
   };
 
   useEffect(() => {
@@ -92,6 +86,7 @@ Cho họ thấy chúng ta đã tiếp nhận thông tin và hứa hẹn một gi
       // Reset state khi mở lại
       setStep('form');
       setIsTypingDone(false);
+      setIsDeposit(false);
       setFormData({ name: '', email: '', message: initialMessage });
     } else {
       document.body.style.overflow = 'unset';
@@ -126,11 +121,12 @@ Cho họ thấy chúng ta đã tiếp nhận thông tin và hứa hẹn một gi
     }, remainingTime);
   };
 
-  const handleConfirm = () => {
+  const submitLead = () => {
     // Lưu xuống hệ thống
     const leadData = {
       ...formData,
-      aiDraft: aiDraftText
+      aiDraft: aiDraftText,
+      notes: isDeposit ? '[VIP_PAID] Khách hàng đặt cọc trực tuyến.' : ''
     };
     addLead(leadData);
     setStep('success');
@@ -139,6 +135,17 @@ Cho họ thấy chúng ta đã tiếp nhận thông tin và hứa hẹn một gi
     setTimeout(() => {
       onClose();
     }, 3000);
+  };
+
+  const handleConfirm = () => {
+    if (isDeposit) {
+      setStep('checkout');
+      setTimeout(() => {
+        submitLead();
+      }, 3000); // Đợi ngân hàng ảo
+    } else {
+      submitLead();
+    }
   };
 
   return (
@@ -176,17 +183,17 @@ Cho họ thấy chúng ta đã tiếp nhận thông tin và hứa hẹn một gi
                   <p className="text-white/60 font-body text-sm mb-6">Mô tả thiết kế của bạn, trí tuệ nhân tạo sẽ phác thảo cơ chế ngay trên màn hình này.</p>
                   <form onSubmit={handleStartAI} className="flex flex-col gap-4 flex-1">
                     <input
-                      type="text" required placeholder="Tên của bạn"
+                      id="contactName" name="contactName" autoComplete="name" type="text" required placeholder="Tên của bạn"
                       value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors font-body text-sm"
                     />
                     <input
-                      type="email" required placeholder="Email làm việc"
+                      id="contactEmail" name="contactEmail" autoComplete="email" type="email" required placeholder="Email làm việc"
                       value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors font-body text-sm"
                     />
                     <textarea
-                      required rows="4" placeholder="Ví dụ: Tôi muốn làm 1 website tin tức, hoặc thiết kế 3D..."
+                      id="contactMessage" name="contactMessage" required rows="4" placeholder="Ví dụ: Tôi muốn làm 1 website tin tức, hoặc thiết kế 3D..."
                       value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})}
                       className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:border-white/40 transition-colors font-body text-sm resize-none"
                     />
@@ -244,23 +251,59 @@ Cho họ thấy chúng ta đã tiếp nhận thông tin và hứa hẹn một gi
                       <motion.div 
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex gap-3 pt-4 border-t border-white/10"
+                        className="flex flex-col gap-4 pt-4 border-t border-white/10"
                       >
-                        <button
-                          onClick={onClose}
-                          className="flex-1 py-3 liquid-glass-strong rounded-xl text-white/70 hover:text-white text-sm font-medium transition-colors"
-                        >
-                          Hủy bỏ
-                        </button>
-                        <button
-                          onClick={handleConfirm}
-                          className="flex-1 py-3 bg-white text-black hover:bg-white/90 rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.3)] text-sm font-medium transition-all flex items-center justify-center gap-2"
-                        >
-                          Chốt phương án <ArrowRight size={16} />
-                        </button>
+                        <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl cursor-pointer hover:bg-white/10 transition-colors" onClick={() => setIsDeposit(!isDeposit)}>
+                          <div className={`w-5 h-5 rounded border ${isDeposit ? 'bg-indigo-500 border-indigo-500' : 'border-white/30'} flex items-center justify-center transition-colors`}>
+                            {isDeposit && <Check size={14} className="text-white" />}
+                          </div>
+                          <div>
+                            <p className="text-white text-sm font-medium">Đặt cọc 10% trực tuyến (Mock)</p>
+                            <p className="text-white/40 text-xs">Giữ chỗ dịch vụ ưu tiên & Gắn thẻ VIP.</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <button
+                            onClick={onClose}
+                            className="flex-1 py-3 liquid-glass-strong rounded-xl text-white/70 hover:text-white text-sm font-medium transition-colors"
+                          >
+                            Hủy bỏ
+                          </button>
+                          <button
+                            onClick={handleConfirm}
+                            className={`flex-[2] py-3 text-black rounded-xl shadow-[0_0_20px_rgba(255,255,255,0.3)] text-sm font-medium transition-all flex items-center justify-center gap-2 ${isDeposit ? 'bg-indigo-400 hover:bg-indigo-300' : 'bg-white hover:bg-white/90'}`}
+                          >
+                            {isDeposit ? 'Thanh Toán Cọc' : 'Chốt phương án'} <ArrowRight size={16} />
+                          </button>
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
+                </motion.div>
+              )}
+
+              {/* BƯỚC 3.5: GIẢ LẬP THANH TOÁN */}
+              {step === 'checkout' && (
+                <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center h-[320px] m-auto text-center w-full">
+                  <div className="w-full bg-black/40 border border-white/10 rounded-2xl p-6 relative overflow-hidden">
+                    {/* Quẹt thẻ ảo */}
+                    <div className="w-full h-1 bg-white/10 absolute top-0 left-0">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: '100%' }}
+                        transition={{ duration: 3 }}
+                        className="h-full bg-indigo-500"
+                      />
+                    </div>
+                    <div className="mb-6 flex justify-center mt-4">
+                      <div className="w-16 h-10 bg-gradient-to-tr from-indigo-500 to-purple-500 rounded-lg shadow-lg flex items-center justify-center animate-pulse">
+                         <span className="text-white text-xs font-bold font-heading">PAY</span>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-heading italic text-white mb-2">Đang kết nối Ngân Hàng...</h3>
+                    <p className="text-white/40 font-body text-sm">Vui lòng không đóng cửa sổ trong lúc hệ thống xử lý giao dịch ảo.</p>
+                  </div>
                 </motion.div>
               )}
 
